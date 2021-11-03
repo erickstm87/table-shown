@@ -9,6 +9,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Button from '@mui/material/Button';
+
 
 const configuration = {
     region: keys.theRegion,
@@ -23,7 +25,8 @@ class Bikes extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            bikeEntries: []
+            bikeEntries: [],
+            sortedEntries: []
         }
     }
     componentDidMount() {
@@ -31,13 +34,12 @@ class Bikes extends Component {
             TableName: 'bike-availability'
         }
         docClient.scan(params, async (err, data) => {
-            if (!err) {
-                console.log(data)
-                
+            if (!err) {                
                 await data.Items.forEach((entry) => {
                     this.setState({bikeEntries: [...this.state.bikeEntries, entry] })
                 })
-                console.log(this.state.bikeEntries);
+                const sortedArray = this.state.bikeEntries.sort((a, b) => { return new Date(b.TimeStamp) - new Date(a.TimeStamp) })
+                this.setState({sortedEntries: sortedArray})
             }
             else {
                 console.log('there was an error: ', err)
@@ -57,12 +59,13 @@ class Bikes extends Component {
               <TableHead>
                 <TableRow>
                   <TableCell>Model</TableCell>
-                  <TableCell align="left">Link</TableCell>
+                  <TableCell align="center">Link</TableCell>
+                  <TableCell align="center">Time Sorted</TableCell>
                   <TableCell align="left">Interested?</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {this.state.bikeEntries.map((row) => (
+                {this.state.sortedEntries.map((row) => (
                   <TableRow
                     key={row.TimeStamp}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -70,8 +73,9 @@ class Bikes extends Component {
                     <TableCell component="th" scope="row">
                       {row.Model}
                     </TableCell>
-                    <TableCell align="left">{row.Link}</TableCell>
-                    <TableCell align="left">Yes/No</TableCell>
+                    <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
+                    <TableCell align="center">{row.TimeStamp}</TableCell>
+                    <TableCell><Button variant="contained" align="center">Yes</Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
