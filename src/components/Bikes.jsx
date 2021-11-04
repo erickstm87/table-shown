@@ -29,10 +29,12 @@ class Bikes extends Component {
             sortedEntries: []
         }
     }
-    componentDidMount() {
+    getEntries = () => {
+        this.setState({bikeEntries: []})
+        this.setState({sortedEntries: []})
         var params = {
             TableName: 'bike-availability'
-        }
+        } 
         docClient.scan(params, async (err, data) => {
             if (!err) {                
                 await data.Items.forEach((entry) => {
@@ -45,6 +47,9 @@ class Bikes extends Component {
                 console.log('there was an error: ', err)
             }
         })
+    }
+    componentDidMount() {
+        this.getEntries()
     }
     render() {
         const paperStyle = {
@@ -74,6 +79,8 @@ class Bikes extends Component {
                     console.log('Success', data)
                 }
             })
+
+            this.getEntries()
         })
         return(
             <TableContainer component={Paper} style={paperStyle}>
@@ -97,7 +104,7 @@ class Bikes extends Component {
                     </TableCell>
                     <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
                     <TableCell align="center">{row.TimeStamp}</TableCell>
-                    { row.Interested == 'Yes' &&
+                    { row.Interested === 'Yes' &&
                         <TableCell><Button disabled variant="contained" align="center">Taken</Button></TableCell>
                     }
                     { !row.Interested &&
