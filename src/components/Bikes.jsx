@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, {Component} from 'react';
 import * as AWS from 'aws-sdk'
 import keys from '../ignored-file.js'
 
@@ -53,6 +53,28 @@ class Bikes extends Component {
             "width": "100%",
             "bgcolor": "background.paper"
         }
+        const updateDyn = ((element) => {
+            
+            element.Interested = 'Yes'
+            var params = {
+                TableName: 'bike-availability',
+                Item: {
+                    Link: element.Link,
+                    Model: element.Model,
+                    TheIndex: element.TheIndex,
+                    TimeStamp: element.TimeStamp,
+                    Interested: element.Interested
+                }
+            }
+            
+            docClient.put(params, function (err, data) {
+                if (err) {
+                    console.log('Error', err)
+                } else {
+                    console.log('Success', data)
+                }
+            })
+        })
         return(
             <TableContainer component={Paper} style={paperStyle}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -75,7 +97,12 @@ class Bikes extends Component {
                     </TableCell>
                     <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
                     <TableCell align="center">{row.TimeStamp}</TableCell>
-                    <TableCell><Button variant="contained" align="center">Yes</Button></TableCell>
+                    { row.Interested == 'Yes' &&
+                        <TableCell><Button disabled variant="contained" align="center">Taken</Button></TableCell>
+                    }
+                    { !row.Interested &&
+                        <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
+                    }
                   </TableRow>
                 ))}
               </TableBody>
