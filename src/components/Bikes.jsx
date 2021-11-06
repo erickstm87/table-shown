@@ -10,6 +10,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { logout } from '../index'
 
 
 const configuration = {
@@ -51,6 +52,9 @@ class Bikes extends Component {
     componentDidMount() {
         this.getEntries()
     }
+    handleTheClick = () => {
+        logout()
+    }
     render() {
         const paperStyle = {
             "display": "flex",
@@ -58,6 +62,7 @@ class Bikes extends Component {
             "width": "100%",
             "bgcolor": "background.paper"
         }
+        
         const updateDyn = ((element) => {
             
             element.Interested = 'Yes'
@@ -84,6 +89,8 @@ class Bikes extends Component {
         })
         return(
             <TableContainer component={Paper} style={paperStyle}>
+            {/* <Button variant="contained" onClick={() => app.auth().signOut()}>Log Out</Button> */}
+            <Button onClick={this.handleTheClick} variant="contained" >Log Out</Button>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
