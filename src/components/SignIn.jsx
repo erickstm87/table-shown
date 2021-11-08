@@ -1,7 +1,66 @@
 import React, {Component} from 'react'
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import {login} from '../index'
+
+import {getAuth, signOut, GithubAuthProvider, signInWithPopup }from "firebase/auth"
+import { initializeApp } from "firebase/app";
+import config from '../firebase/config'
+
+const firebaseConfig = {
+  apiKey: config.apiKey,
+  authDomain: config.authDomain,
+  projectId: config.projectId,
+  storageBucket: config.storageBucket,
+  messagingSenderId: config.messagingSenderId,
+  appId: config.appId,
+  measurementId: config.measurementId
+};
+
+const provider = new GithubAuthProvider();
+initializeApp(firebaseConfig);
+
+provider.setCustomParameters({
+  'allow_signup': 'false'
+});
+
+const auth = getAuth();
+
+getAuth().onAuthStateChanged(function(user) {
+    if(user) {
+      document.dispatchEvent(new CustomEvent('signedIn', { detail: true }))
+    }
+    else {
+      document.dispatchEvent(new CustomEvent('signedIn', { detail: false }))
+    }
+})
+
+const login = () => {
+    signInWithPopup(auth, provider)
+  .then((result) => {
+    // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+    const credential = GithubAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+
+    // The signed-in user info.
+    const user = result.user;
+    // ...
+  }).catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.email;
+    // The AuthCredential type that was used.
+    const credential = GithubAuthProvider.credentialFromError(error);
+    // ...
+  });
+}
+function logout(event) {
+    signOut(auth).then(() => {
+        // Sign-out successful.
+    }).catch((error) => {
+        // An error happened.
+});
+}
 
 class SignIn extends Component {
     constructor(props) {
@@ -11,34 +70,12 @@ class SignIn extends Component {
             password: ''
         }
     }
-    handleEmailChange = (e) => {
-        this.setState({email: e.target.value});
-     }
-     handlePasswordChange = (e) => {
-        this.setState({password: e.target.value});
-     }
-    handleSubmit = (event) => {
-        event.preventDefault();
-        const y = this.state.email
-        const x = this.state.password
-        login({"email": y, "password": x})
-    }
     render(){
-         
-        return(   
-            <form onSubmit = {this.handleSubmit}>
-                <TextField onChange = {this.handleEmailChange} type="text" variant="filled" name="email" type="username" placeholder="email"/>
-                
-            <br />    
-            
-                <TextField onChange = {this.handlePasswordChange}type="text" variant="filled" name="password" type="password" placeholder="password" />
-            
-            <br />
-            <br />
-                <Button  type="submit" variant="contained" >Sign In</Button>
-            </form>
+        return(    
+            <Button onClick={login} variant="contained">Login</Button>
         )
     }
 }
 
 export default SignIn
+export { logout }
