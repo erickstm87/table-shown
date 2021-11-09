@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import './App.css';
 import Bikes from './components/Bikes'
-import SignIn from './components/SignIn'
+import EmailSignIn from './components/EmailSign'
+import GithubSignIn from './components/GHSignin'
 
 class App extends Component {
   constructor(){
@@ -19,10 +20,17 @@ class App extends Component {
 
   render() {
     return(
-      <div className="App">
+      <div className="App" style={{ marginTop: "2.5%" }}>
         {
           !this.state.signedIn &&
-          <SignIn />
+          <div>
+            <GithubSignIn />
+            <br />
+            <br />
+            <br />
+            <br />
+            <EmailSignIn />
+          </div>
         }
         { this.state.signedIn &&
           <Bikes />
