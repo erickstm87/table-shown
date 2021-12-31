@@ -112,7 +112,7 @@ class Bikes extends Component {
                     <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
                     <TableCell align="center">{row.TimeStamp}</TableCell>
                     { row.Interested === 'Yes' &&
-                        <TableCell><Button disabled variant="contained" align="center">Taken</Button></TableCell>
+                        <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
                     }
                     { !row.Interested &&
                         <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
