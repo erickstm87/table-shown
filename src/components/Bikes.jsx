@@ -2,14 +2,16 @@ import React, {Component} from 'react';
 import * as AWS from 'aws-sdk'
 import keys from '../ignored-file.js'
 
+// import Search from './Search.jsx';
+import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
 import { logout } from '../signIn/signInForm'
 
 
@@ -27,7 +29,10 @@ class Bikes extends Component {
         super(props)
         this.state = {
             bikeEntries: [],
-            sortedEntries: []
+            sortedEntries: [],
+            filteredEntries: [],
+            searchTerm: '',
+            toggled: false
         }
     }
     getEntries = () => {
@@ -49,11 +54,30 @@ class Bikes extends Component {
             }
         })
     }
-    componentDidMount() {
+    componentWillMount() {
         this.getEntries()
+    }
+    componentDidUpdate() {
+        if(this.state.searchTerm.length > 0 && !this.state.toggled) {
+            // console.log('this is being called before', this.state.searchTerm);
+        }
+        else {
+            // console.log('no term yet');
+        }
     }
     handleTheClick = () => {
         logout()
+    }
+    handleSearch = async (event) => {
+        const term = event.target.value;
+        await this.setState({searchTerm: term})
+        const filteredBikes = this.state.bikeEntries.filter((entry) => entry.Model.includes(term))
+        await this.setState({filteredEntries: filteredBikes})
+        this.forceUpdate();
+        // console.log('heyyyyyyyyy being called!!!!', term, JSON.stringify(this.state.filteredEntries));
+        await setTimeout(() => {console.log('timeout is being called')}, 1000);
+        debugger
+        return
     }
     render() {
         const paperStyle = {
@@ -61,6 +85,12 @@ class Bikes extends Component {
             "flexDirection": "column",
             "width": "100%",
             "bgcolor": "background.paper"
+        }
+
+        const searchStyle = {
+            margin: 'auto',
+            width: '50%',
+            padding: '10px',
         }
         
         const updateDyn = ((element) => {
@@ -91,6 +121,16 @@ class Bikes extends Component {
             <TableContainer component={Paper} style={paperStyle}>
             {/* <Button variant="contained" onClick={() => app.auth().signOut()}>Log Out</Button> */}
             <Button onClick={this.handleTheClick} variant="contained" >Log Out</Button>
+            <TextField 
+                style={searchStyle}
+                id="outlined-basic" 
+                placeholder={"Which Model"}
+                variant="outlined" 
+                key="random1"
+                type="text"
+                // value={term}
+                onChange={this.handleSearch}
+            />
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
                 <TableRow>
@@ -100,26 +140,45 @@ class Bikes extends Component {
                   <TableCell align="left">Interested?</TableCell>
                 </TableRow>
               </TableHead>
-              <TableBody>
-                {this.state.sortedEntries.map((row) => (
-                  <TableRow
-                    key={row.TimeStamp}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.Model}
-                    </TableCell>
-                    <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
-                    <TableCell align="center">{row.TimeStamp}</TableCell>
-                    { row.Interested === 'Yes' &&
-                        <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
-                    }
-                    { !row.Interested &&
-                        <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
-                    }
-                  </TableRow>
-                ))}
-              </TableBody>
+             
+                <TableBody>
+                    {/* {!this.state.searchTerm && this.state.sortedEntries.map((row) => (
+                    <TableRow
+                        key={row.TimeStamp}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                        <TableCell component="th" scope="row">
+                        {row.Model}
+                        </TableCell>
+                        <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
+                        <TableCell align="center">{row.TimeStamp}</TableCell>
+                        { row.Interested === 'Yes' &&
+                            <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
+                        }
+                        { !row.Interested &&
+                            <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
+                        }
+                    </TableRow> 
+                    ))}    */}
+                    {this.state.filteredEntries.map((row) => (
+                    <TableRow
+                        key={row.TimeStamp}
+                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                    >
+                        <TableCell component="th" scope="row">
+                        {row.Model}
+                        </TableCell>
+                        <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
+                        <TableCell align="center">{row.TimeStamp}</TableCell>
+                        { row.Interested === 'Yes' &&
+                            <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
+                        }
+                        { !row.Interested &&
+                            <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
+                        }
+                    </TableRow>
+                    ))}
+                </TableBody> 
             </Table>
           </TableContainer>
         )
