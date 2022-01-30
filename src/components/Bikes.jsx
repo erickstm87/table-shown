@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import * as AWS from 'aws-sdk'
 import keys from '../ignored-file.js'
 
-// import Search from './Search.jsx';
 import Button from '@mui/material/Button';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -35,9 +34,12 @@ class Bikes extends Component {
             toggled: false
         }
     }
-    getEntries = () => {
-        this.setState({bikeEntries: []})
-        this.setState({sortedEntries: []})
+    getEntries = async () => {
+        this.setState({
+            filteredEntries: [],
+            bikeEntries: [],
+            sortedEntries: []
+        })
         var params = {
             TableName: 'bike-availability'
         } 
@@ -54,29 +56,21 @@ class Bikes extends Component {
             }
         })
     }
-    componentWillMount() {
+    componentDidMount() {
         this.getEntries()
-    }
-    componentDidUpdate() {
-        if(this.state.searchTerm.length > 0 && !this.state.toggled) {
-            // console.log('this is being called before', this.state.searchTerm);
-        }
-        else {
-            // console.log('no term yet');
-        }
     }
     handleTheClick = () => {
         logout()
     }
-    handleSearch = async (event) => {
+    handleSearch = (event) => {
         const term = event.target.value;
-        await this.setState({searchTerm: term})
-        const filteredBikes = this.state.bikeEntries.filter((entry) => entry.Model.includes(term))
-        await this.setState({filteredEntries: filteredBikes})
-        this.forceUpdate();
-        // console.log('heyyyyyyyyy being called!!!!', term, JSON.stringify(this.state.filteredEntries));
-        await setTimeout(() => {console.log('timeout is being called')}, 1000);
-        debugger
+        this.setState((state) => {
+           return {
+               ...state,
+               searchTerm: term,
+               filteredEntries: state.bikeEntries.filter((entry) => entry.Model.includes(term))
+           } 
+        })
         return
     }
     render() {
@@ -119,8 +113,6 @@ class Bikes extends Component {
         })
         return(
             <TableContainer component={Paper} style={paperStyle}>
-            {/* <Button variant="contained" onClick={() => app.auth().signOut()}>Log Out</Button> */}
-            <Button onClick={this.handleTheClick} variant="contained" >Log Out</Button>
             <TextField 
                 style={searchStyle}
                 id="outlined-basic" 
@@ -128,7 +120,7 @@ class Bikes extends Component {
                 variant="outlined" 
                 key="random1"
                 type="text"
-                // value={term}
+                value={this.state.searchTerm}
                 onChange={this.handleSearch}
             />
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -140,11 +132,10 @@ class Bikes extends Component {
                   <TableCell align="left">Interested?</TableCell>
                 </TableRow>
               </TableHead>
-             
                 <TableBody>
-                    {/* {!this.state.searchTerm && this.state.sortedEntries.map((row) => (
+                    {!this.state.searchTerm && this.state.sortedEntries.map((row) => (
                     <TableRow
-                        key={row.TimeStamp}
+                        key={row.Link}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                         <TableCell component="th" scope="row">
@@ -152,17 +143,17 @@ class Bikes extends Component {
                         </TableCell>
                         <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
                         <TableCell align="center">{row.TimeStamp}</TableCell>
-                        { row.Interested === 'Yes' &&
+                        {row.Interested === 'Yes' &&
                             <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
                         }
-                        { !row.Interested &&
+                        {!row.Interested &&
                             <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
                         }
                     </TableRow> 
-                    ))}    */}
-                    {this.state.filteredEntries.map((row) => (
+                    ))}   
+                    {this.state.searchTerm && this.state.filteredEntries.map((row) => (
                     <TableRow
-                        key={row.TimeStamp}
+                        key={row.Link}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                         <TableCell component="th" scope="row">
@@ -170,16 +161,18 @@ class Bikes extends Component {
                         </TableCell>
                         <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
                         <TableCell align="center">{row.TimeStamp}</TableCell>
-                        { row.Interested === 'Yes' &&
+                        {row.Interested === 'Yes' &&
                             <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
                         }
-                        { !row.Interested &&
+                        {!row.Interested &&
                             <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
                         }
                     </TableRow>
                     ))}
                 </TableBody> 
+               
             </Table>
+            <Button onClick={this.handleTheClick} variant="contained">Log Out</Button>
           </TableContainer>
         )
     }
