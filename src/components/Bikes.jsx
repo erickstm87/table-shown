@@ -31,7 +31,7 @@ class Bikes extends Component {
             sortedEntries: [],
             filteredEntries: [],
             searchTerm: '',
-            toggled: false
+            entryOptions: 'sortedEntries'
         }
     }
     getEntries = async () => {
@@ -68,9 +68,11 @@ class Bikes extends Component {
            return {
                ...state,
                searchTerm: term,
+               entryOptions: 'filteredEntries',
                filteredEntries: state.bikeEntries.filter((entry) => entry.Model.includes(term))
            } 
         })
+
         return
     }
     render() {
@@ -133,7 +135,7 @@ class Bikes extends Component {
                 </TableRow>
               </TableHead>
                 <TableBody>
-                    {!this.state.searchTerm && this.state.sortedEntries.map((row) => (
+                    {this.state[this.state.entryOptions].map((row) => (
                     <TableRow
                         key={row.Link}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -151,24 +153,6 @@ class Bikes extends Component {
                         }
                     </TableRow> 
                     ))}   
-                    {this.state.searchTerm && this.state.filteredEntries.map((row) => (
-                    <TableRow
-                        key={row.Link}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                        <TableCell component="th" scope="row">
-                        {row.Model}
-                        </TableCell>
-                        <TableCell align="center"><a href={row.Link} target="_blank">{row.Link}</a></TableCell>
-                        <TableCell align="center">{row.TimeStamp}</TableCell>
-                        {row.Interested === 'Yes' &&
-                            <TableCell><Button disabled variant="contained" align="center">Interested</Button></TableCell>
-                        }
-                        {!row.Interested &&
-                            <TableCell><Button onClick= {() => updateDyn(row)} variant="contained" align="center">Yes</Button></TableCell>
-                        }
-                    </TableRow>
-                    ))}
                 </TableBody> 
                
             </Table>
